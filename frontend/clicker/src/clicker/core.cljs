@@ -1,18 +1,45 @@
 (ns clicker.core
-  (:require [reagent.core :as reagent :refer [atom]]))
+  [:require [oops.core :refer [oset!]]
+   [clojure.core.async :refer [<! timeout go-loop]]])
 
 ;; define your app data so that it doesn't get over-written on reload
 
 (defonce app-state (atom {:text "Hello world!"}))
 
-(defn hello-world []
-  [:div
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this and watch it change!"]])
+(def canvas (.getElementById js/document "canvas"))
+(def cookie_image (new js/Image))
+(oset! cookie_image "src" "/images/cookie.jpg")
+
+(defn printpass [prev]
+  (print prev)
+  prev)
+
+(defn clear-canvas [ctx state]
+  (.clearRect ctx 0 0 (.-width canvas) (.-height canvas))
+  )
+
+(defn render-cookie [ctx state]
+  
+  (.drawImage ctx cookie_image 0 0 150 150)
+
+  state)
+
+(defn cookie-clicker [ctx]
+  (defn main-loop [state]
+    (render-cookie ctx (clear-canvas ctx state))
+    )
+  
+  (go-loop [state (main-loop {})]
+    (<! (timeout 18))
+    (recur (main-loop state))))
 
 (defn start []
-  (reagent/render-component [hello-world]
-                            (. js/document (getElementById "app"))))
+    (let [ctx (.getContext canvas "2d")]
+      (cookie-clicker ctx)
+      
+      )
+  )
+
 
 (defn ^:export init []
   ;; init is called ONCE when the page loads
