@@ -1,0 +1,6 @@
+node_modules
+.shadow-cljs
+.idea
+public/js
+.clj-kondo
+.lsp
